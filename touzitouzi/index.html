@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>3个独立骰子</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: transparent;
+            flex-wrap: wrap;
+        }
+        /* 单个骰子容器 */
+        .dice-box {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+        .dice {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+        }
+        .dice-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: none;
+            border-radius: 0;
+        }
+        /* 骰子6面定位 */
+        .face1 { transform: rotateY(0deg) translateZ(90px); }
+        .face2 { transform: rotateY(90deg) translateZ(90px); }
+        .face3 { transform: rotateY(180deg) translateZ(90px); }
+        .face4 { transform: rotateY(-90deg) translateZ(90px); }
+        .face5 { transform: rotateX(90deg) translateZ(90px); }
+        .face6 { transform: rotateX(-90deg) translateZ(90px); }
+
+        /* 按钮组 */
+        .dice-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .rollBtn {
+            padding: 10px 24px;
+            font-size: 16px;
+            background: #42b983;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 第一个骰子 -->
+<div class="dice-item">
+    <div class="dice-box">
+        <div class="dice" id="dice1">
+            <div class="dice-face face1" style="background-image: url('1.png')"></div>
+            <div class="dice-face face2" style="background-image: url('2.png')"></div>
+            <div class="dice-face face3" style="background-image: url('1.png')"></div>
+            <div class="dice-face face4" style="background-image: url('2.png')"></div>
+            <div class="dice-face face5" style="background-image: url('1.png')"></div>
+            <div class="dice-face face6" style="background-image: url('2.png')"></div>
+        </div>
+    </div>
+    <button class="rollBtn" data-id="1">骰子1 开始</button>
+</div>
+
+<!-- 第二个骰子 -->
+<div class="dice-item">
+    <div class="dice-box">
+        <div class="dice" id="dice2">
+            <div class="dice-face face1" style="background-image: url('3.png')"></div>
+            <div class="dice-face face2" style="background-image: url('4.png')"></div>
+            <div class="dice-face face3" style="background-image: url('5.png')"></div>
+            <div class="dice-face face4" style="background-image: url('3.png')"></div>
+            <div class="dice-face face5" style="background-image: url('4.png')"></div>
+            <div class="dice-face face6" style="background-image: url('5.png')"></div>
+        </div>
+    </div>
+    <button class="rollBtn" data-id="2">骰子2 开始</button>
+</div>
+
+<!-- 第三个骰子 -->
+<div class="dice-item">
+    <div class="dice-box">
+        <div class="dice" id="dice3">
+            <div class="dice-face face1" style="background-image: url('6.png')"></div>
+            <div class="dice-face face2" style="background-image: url('7.png')"></div>
+            <div class="dice-face face3" style="background-image: url('6.png')"></div>
+            <div class="dice-face face4" style="background-image: url('7.png')"></div>
+            <div class="dice-face face5" style="background-image: url('6.png')"></div>
+            <div class="dice-face face6" style="background-image: url('7.png')"></div>
+        </div>
+    </div>
+    <button class="rollBtn" data-id="3">骰子3 开始</button>
+</div>
+
+<script>
+    // 6个面标准正对角度
+    const faces = [
+        { x: 0, y: 0 },
+        { x: 0, y: -90 },
+        { x: 0, y: 180 },
+        { x: 0, y: 90 },
+        { x: -90, y: 0 },
+        { x: 90, y: 0 }
+    ];
+
+    // 状态管理
+    const diceStates = {
+        1: { rolling: false, interval: null },
+        2: { rolling: false, interval: null },
+        3: { rolling: false, interval: null }
+    };
+
+    // 绑定所有按钮
+    document.querySelectorAll('.rollBtn').forEach(btn => {
+        btn.onclick = function () {
+            const id = this.dataset.id;
+            const dice = document.getElementById(`dice${id}`);
+            const state = diceStates[id];
+
+            if (!state.rolling) {
+                // 开始旋转
+                state.rolling = true;
+                this.textContent = `骰子${id} 停止`;
+                state.interval = setInterval(() => {
+                    let x = Math.random() * 720;
+                    let y = Math.random() * 720;
+                    dice.style.transform = `rotateX(${x}deg) rotateY(${y}deg)`;
+                    dice.style.transition = "0.1s linear";
+                }, 100);
+            } else {
+                // 停止 → 随机正对
+                state.rolling = false;
+                this.textContent = `骰子${id} 开始`;
+                clearInterval(state.interval);
+
+                let randomFace = faces[Math.floor(Math.random() * 6)];
+                dice.style.transition = "0.8s ease-out";
+                dice.style.transform = `rotateX(${randomFace.x}deg) rotateY(${randomFace.y}deg)`;
+            }
+        };
+    });
+</script>
+</body>
+</html>
